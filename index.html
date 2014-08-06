@@ -8,9 +8,9 @@
 		<script type="text/javascript" src="asset/todolist.js"></script>
 		<script type="text/javascript" src="asset/mustache.js"></script>
 		<script type="text/template" id="todo-template">
-			<li>
+			<li data-key={{key}} class={{completed}}>
 				<div class="view">
-					<input class="toggle" type="checkbox">
+					<input class="toggle" type="checkbox" {{checked}}>
 					<label>{{text}}</label>
 					<button class="destroy"></button>
 				</div>
