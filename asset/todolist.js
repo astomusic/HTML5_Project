@@ -1,43 +1,51 @@
 var TODOSync = {
+	url : "http://ui.nhnnext.org:3333/",
+	id : "astomusic",
+
 	get : function(callback) {
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET","http://ui.nhnnext.org:3333/astomusic",true);
+		xhr.open("GET", this.url + this.id, true);
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 		xhr.addEventListener("load", function(e){
-			callback(JSON.parse(xhr.responseText));
-		});
+			if(xhr.status === 200) {
+				callback(JSON.parse(xhr.responseText));
+			}
+		}.bind(this));
 		xhr.send();
 	},
 
 	add : function(todo, callback) {
 		var xhr = new XMLHttpRequest();
-		xhr.open("PUT","http://ui.nhnnext.org:3333/astomusic",true);
+		xhr.open("PUT", this.url + this.id, true);
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 		xhr.addEventListener("load", function(e){
-			//DOM add
-			callback(JSON.parse(xhr.responseText));
+			if(xhr.status === 200) {
+				callback(JSON.parse(xhr.responseText));
+			}
 		});
 		xhr.send("todo="+todo);
 	},
 
 	completed : function(param, callback) {
 		var xhr = new XMLHttpRequest();
-		xhr.open("POST","http://ui.nhnnext.org:3333/astomusic/" + param.key ,true);
+		xhr.open("POST", this.url + this.id + "/" + param.key ,true);
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 		xhr.addEventListener("load", function(e){
-			//DOM add
-			callback(JSON.parse(xhr.responseText));
+			if(xhr.status === 200) {
+				callback(JSON.parse(xhr.responseText));
+			}
 		});
 		xhr.send("completed="+param.completed);
 	},
 
 	remove : function(key, callback) {
 		var xhr = new XMLHttpRequest();
-		xhr.open("DELETE","http://ui.nhnnext.org:3333/astomusic/" + key ,true);
+		xhr.open("DELETE", this.url + this.id + "/" + key ,true);
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 		xhr.addEventListener("load", function(e){
-			//DOM add
-			callback(JSON.parse(xhr.responseText));
+			if(xhr.status === 200) {
+				callback(JSON.parse(xhr.responseText));
+			}
 		});
 		xhr.send();
 	}
@@ -47,20 +55,21 @@ var TODO =  {
 	ENTER_KEYCODE : 13,
 
 	init :  function() {
-		$("#new-todo").on("keydown", $.proxy(TODO.add, TODO));//jquery의 bind방법?
-		$("#todo-list").on("click", ".toggle", TODO.completed);
-		$("#todo-list").on("click", ".destroy", TODO.remove);
+		$("#new-todo").on("keydown", this.add.bind(this));
+		$("#todo-list").on("click", ".toggle", this.completed);
+		$("#todo-list").on("click", ".destroy", this.remove);
 
 		TODOSync.get(function(response){
-			response.forEach(function(value, key){	
-				var todo = $("#new-todo")[0].value;
-				var completed = value.completed?"completed":"";
-				var checked = value.completed?"checked":"";
-				var todoLi = TODO.build(value.todo, value.id, completed, checked); //this의 범위?
-				var appendedTodo = $('#todo-list').append(todoLi);
-				$("#todo-list li:last-child").css("opacity", 1);
-			})
-		});
+			var initLi = ""
+			response.map(function(res){
+				var completed = res.completed?"completed":"";
+				var checked = res.completed?"checked":"";
+				var todoLi = this.build(res.todo, res.id, completed, checked); 
+				initLi = initLi + todoLi;
+			}.bind(this));
+			var appendedTodo = $('#todo-list').append(initLi);
+			$("#todo-list li:last-child").css("opacity", 1);
+		}.bind(this));
 
 		utility.featureDetector();
 	},
@@ -72,10 +81,8 @@ var TODO =  {
 			completed: completed,
 			checked: checked
 		}
-		var template = $('#todo-template').html();
+		var template = utility.todoTemplate();
 		var html = Mustache.to_html(template, template_vars);
-
-		console.log(html);
 
 		return html;
 	},
@@ -129,48 +136,39 @@ var utility = {
 	transitionEnd : "",
 
 	featureDetector : function() {
-	// 해당브라우져에서 동작가능한 transitionEnd 타입을 찾아서 해당 타입을 result로 반환 해준다.
-	var result;
-	var elForCheck = document.querySelector("body");
+		// 해당브라우져에서 동작가능한 transitionEnd 타입을 찾아서 해당 타입을 result로 반환 해준다.
+		var result;
+		var elForCheck = document.querySelector("body");
 
-	var status = {
-		"webkitTransitionEnd" : typeof elForCheck.style.webkitTransform,
-		"mozTransitionEnd" : typeof elForCheck.style.MozTransform,
-		"OTransitionEnd" : typeof elForCheck.style.OTransform,
-		"msTransitionEnd" : typeof elForCheck.style.msTransform,
-		"transitionEnd" : typeof elForCheck.style.transform
-	}
-
-	for ( var key in status) {
-		if (status[key] !== "undefined") {
-			result = key;
+		var status = {
+			"webkitTransitionEnd" : typeof elForCheck.style.webkitTransform,
+			"mozTransitionEnd" : typeof elForCheck.style.MozTransform,
+			"OTransitionEnd" : typeof elForCheck.style.OTransform,
+			"msTransitionEnd" : typeof elForCheck.style.msTransform,
+			"transitionEnd" : typeof elForCheck.style.transform
 		}
-	}
 
-	this.transitionEnd = result;
-}
-}
-
-var featureDetector = function() {
-	// 해당브라우져에서 동작가능한 transitionEnd 타입을 찾아서 해당 타입을 result로 반환 해준다.
-	var result;
-	var elForCheck = document.querySelector("body");
-
-	var status = {
-		"webkitTransitionEnd" : typeof elForCheck.style.webkitTransform,
-		"mozTransitionEnd" : typeof elForCheck.style.MozTransform,
-		"OTransitionEnd" : typeof elForCheck.style.OTransform,
-		"msTransitionEnd" : typeof elForCheck.style.msTransform,
-		"transitionEnd" : typeof elForCheck.style.transform
-	}
-
-	for ( var key in status) {
-		if (status[key] !== "undefined") {
-			result = key;
+		for ( var key in status) {
+			if (status[key] !== "undefined") {
+				result = key;
+			}
 		}
-	}
 
-	return result;
+		this.transitionEnd = result;
+	},
+
+	todoTemplate : function() {
+		var temp = "";
+		temp += "<li data-key={{key}} class={{completed}}>";
+		temp += "<div class=\"view\">";
+		temp += "<input class=\"toggle\" type=\"checkbox\" {{checked}}>";
+		temp += "<label>{{text}}</label>";
+		temp += "<button class=\"destroy\"></button>";
+		temp += "</div>";
+		temp += "</li>";
+
+		return temp;
+	}
 }
 
-document.addEventListener("DOMContentLoaded",TODO.init);
+document.addEventListener("DOMContentLoaded",TODO.init.bind(TODO));
