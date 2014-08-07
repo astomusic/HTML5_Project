@@ -4,7 +4,7 @@ var TODOSync = {
 		xhr.open("GET","http://ui.nhnnext.org:3333/astomusic",true);
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 		xhr.addEventListener("load", function(e){
-			callback(JSON.parse(xhr.responseText).reverse());
+			callback(JSON.parse(xhr.responseText));
 		});
 		xhr.send();
 	},
@@ -117,7 +117,7 @@ var TODO =  {
 			
 			TODOSync.add(todo, function(json){
 				var todoLi = this.build(todo, json.insertId, "", "");
-				var appendedTodo = $('#todo-list').append(todoLi);
+				var appendedTodo = $('#todo-list').prepend(todoLi);
 				$("#new-todo")[0].value = "";
 				$("#todo-list li:last-child").css("opacity", 1);
 			}.bind(this));	
