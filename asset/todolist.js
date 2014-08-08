@@ -22,12 +22,6 @@ var TODOSync = {
 	},
 
 	onoffLineListener : function() {
-		// if(navigator.online) {
-		// 	document.getElementById("header").classList.remove("offline");
-		// } else {
-		// 	document.getElementById("header").classList.add("offline");
-		// }
-
 		document.getElementById("header").classList[navigator.onLine?"remove":"add"]("offline");
 
 		if(navigator.onLine) {
@@ -137,11 +131,10 @@ var TODO =  {
 
 		$("#filters").on("click", "a", this.changeStateFilter.bind(this));
 
-		//window.addEventListener("popstate", this.chageURLFilter.bind(this));
+		window.addEventListener("popstate", this.chageURLFilter.bind(this));
 	},
 
 	chageURLFilter : function(e) {
-		console.log(e);
 		if(e.state) {
 			var method = e.state.method;
 			this[method+"View"]();
@@ -153,12 +146,11 @@ var TODO =  {
 	changeStateFilter : function(e) {
 		var target =  e.target
 		var href = target.getAttribute("href");
-		console.log(href);
 		if(href === "index.html") {
 			this.allView();
 			history.pushState({"method":"all"},null,"index.html");
 		} else if(href === "active") {
-			this.activeview();
+			this.activeView();
 			history.pushState({"method":"active"},null,"active");
 		} else if(href === "completed") {
 			this.completedView();
@@ -173,7 +165,7 @@ var TODO =  {
 		this.selectNavigtor(0);
 	},
 
-	activeview : function() {
+	activeView : function() {
 		$("#todo-list")[0].className = "all-active";
 		this.selectNavigtor(1);
 	},
