@@ -2,6 +2,15 @@
 //offline일때 header 엘리먼트에 offline 클래스 추가하고
 //online일때 header 엘리먼트에 offline 클래스 삭제하기
 
+//todo-list 엘리먼트에 active(completed)엘리면트를 누르면
+//	1.todo list에 all-active(all-completed) 클래스 추가
+//	2.기존 anchor에 selected 삭제
+//	3.선택된 anchor에 selected 클래스 추가
+
+// 동적으로 UI를 변경후 history 추가
+// history.pushState({"method":"complete"},null,"active")
+// 뒤로가기 할때 이벤트를 받아서 변경
+// window.addEvnetLister("popstate", callback);
 
 var TODOSync = {
 	url : "http://ui.nhnnext.org:3333/",
@@ -13,8 +22,17 @@ var TODOSync = {
 	},
 
 	onoffLineListener : function() {
-		console.log(this);
-		console.log("event");
+		// if(navigator.online) {
+		// 	document.getElementById("header").classList.remove("offline");
+		// } else {
+		// 	document.getElementById("header").classList.add("offline");
+		// }
+
+		document.getElementById("header").classList[navigator.onLine?"remove":"add"]("offline");
+
+		if(navigator.onLine) {
+			//서버와 sync
+		}
 	},
 
 	get : function(callback) {
@@ -36,13 +54,19 @@ var TODOSync = {
 	},
 
 	add : function(todo, callback) {
-		$.ajax({
-			type: "PUT",
-			url: this.url + this.id,
-			data: { todo: todo }
-		}).done(function( msg ) {
-			callback(msg);
-		});
+		if(navigator.onLine) {
+			$.ajax({
+				type: "PUT",
+				url: this.url + this.id,
+				data: { todo: todo }
+			}).done(function( msg ) {
+				callback(msg);
+			});
+		} else {
+			//data client 에 저장
+			//localStorage, idexed DB, wegsql
+		}
+		
 
 		// var xhr = new XMLHttpRequest();
 		// xhr.open("PUT", this.url + this.id, true);
@@ -97,15 +121,76 @@ var TODOSync = {
 
 var TODO =  {
 	ENTER_KEYCODE : 13,
+	SelectedIndex : 0,
 
 	init :  function() {
-
 		TODOSync.init();
+		this.initEventBind();
+		this.getTodoList();
+		utility.featureDetector();
+	},
 
+	initEventBind : function() {
 		$("#new-todo").on("keydown", this.add.bind(this));
 		$("#todo-list").on("click", ".toggle", this.completed);
 		$("#todo-list").on("click", ".destroy", this.remove);
 
+		$("#filters").on("click", "a", this.changeStateFilter.bind(this));
+
+		//window.addEventListener("popstate", this.chageURLFilter.bind(this));
+	},
+
+	chageURLFilter : function(e) {
+		console.log(e);
+		if(e.state) {
+			var method = e.state.method;
+			this[method+"View"]();
+		} else {
+			this.allView();
+		}
+	},
+
+	changeStateFilter : function(e) {
+		var target =  e.target
+		var href = target.getAttribute("href");
+		console.log(href);
+		if(href === "index.html") {
+			this.allView();
+			history.pushState({"method":"all"},null,"index.html");
+		} else if(href === "active") {
+			this.activeview();
+			history.pushState({"method":"active"},null,"active");
+		} else if(href === "completed") {
+			this.completedView();
+			history.pushState({"method":"completed"},null,"completed");
+		}
+
+		e.preventDefault();
+	},
+
+	allView : function() {
+		$("#todo-list")[0].className = "";
+		this.selectNavigtor(0);
+	},
+
+	activeview : function() {
+		$("#todo-list")[0].className = "all-active";
+		this.selectNavigtor(1);
+	},
+
+	completedView : function() {
+		$("#todo-list")[0].className = "all-completed";
+		this.selectNavigtor(2);
+	},
+
+	selectNavigtor : function(index) {
+		var navigatorList = $("#filters a");
+		navigatorList[this.SelectedIndex].classList.remove("selected");
+		navigatorList[index].classList.add("selected");
+		this.SelectedIndex = index;
+	}, 
+
+	getTodoList : function() {
 		TODOSync.get(function(response){
 			var initLi = ""
 			response.map(function(res){
@@ -117,8 +202,6 @@ var TODO =  {
 			var appendedTodo = $('#todo-list').append(initLi);
 			$("#todo-list li:last-child").css("opacity", 1);
 		}.bind(this));
-
-		utility.featureDetector();
 	},
 
 	build : function(todo, key, completed, checked) {
