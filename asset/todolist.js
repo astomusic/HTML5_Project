@@ -1,53 +1,97 @@
+//online, offline 이벤트 할당을 하고
+//offline일때 header 엘리먼트에 offline 클래스 추가하고
+//online일때 header 엘리먼트에 offline 클래스 삭제하기
+
+
 var TODOSync = {
 	url : "http://ui.nhnnext.org:3333/",
 	id : "astomusic",
+	
+	init : function() {
+		window.addEventListener("online", this.onoffLineListener);
+		window.addEventListener("offline", this.onoffLineListener);
+	},
+
+	onoffLineListener : function() {
+		console.log(this);
+		console.log("event");
+	},
 
 	get : function(callback) {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", this.url + this.id, true);
-		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-		xhr.addEventListener("load", function(e){
-			if(xhr.status === 200) {
-				callback(JSON.parse(xhr.responseText));
-			}
-		}.bind(this));
-		xhr.send();
+		$.ajax({
+			type: "GET",
+			url: this.url + this.id,
+		}).done(function( msg ) {
+			callback(msg);
+		});
+		// var xhr = new XMLHttpRequest();
+		// xhr.open("GET", this.url + this.id, true);
+		// xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+		// xhr.addEventListener("load", function(e){
+		// 	if(xhr.status === 200) {
+		// 		callback(JSON.parse(xhr.responseText));
+		// 	}
+		// }.bind(this));
+		// xhr.send();
 	},
 
 	add : function(todo, callback) {
-		var xhr = new XMLHttpRequest();
-		xhr.open("PUT", this.url + this.id, true);
-		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-		xhr.addEventListener("load", function(e){
-			if(xhr.status === 200) {
-				callback(JSON.parse(xhr.responseText));
-			}
+		$.ajax({
+			type: "PUT",
+			url: this.url + this.id,
+			data: { todo: todo }
+		}).done(function( msg ) {
+			callback(msg);
 		});
-		xhr.send("todo="+todo);
+
+		// var xhr = new XMLHttpRequest();
+		// xhr.open("PUT", this.url + this.id, true);
+		// xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+		// xhr.addEventListener("load", function(e){
+		// 	if(xhr.status === 200) {
+		// 		callback(JSON.parse(xhr.responseText));
+		// 	}
+		// });
+		// xhr.send("todo="+todo);
 	},
 
 	completed : function(param, callback) {
-		var xhr = new XMLHttpRequest();
-		xhr.open("POST", this.url + this.id + "/" + param.key ,true);
-		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-		xhr.addEventListener("load", function(e){
-			if(xhr.status === 200) {
-				callback(JSON.parse(xhr.responseText));
-			}
+		$.ajax({
+			type: "POST",
+			url: this.url + this.id + "/" + param.key,
+			data: { completed: param.completed }
+		}).done(function( msg ) {
+			callback();
 		});
-		xhr.send("completed="+param.completed);
+
+		// var xhr = new XMLHttpRequest();
+		// xhr.open("POST", this.url + this.id + "/" + param.key ,true);
+		// xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+		// xhr.addEventListener("load", function(e){
+		// 	if(xhr.status === 200) {
+		// 		callback();
+		// 	}
+		// });
+		// xhr.send("completed="+param.completed);
 	},
 
 	remove : function(key, callback) {
-		var xhr = new XMLHttpRequest();
-		xhr.open("DELETE", this.url + this.id + "/" + key ,true);
-		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-		xhr.addEventListener("load", function(e){
-			if(xhr.status === 200) {
-				callback(JSON.parse(xhr.responseText));
-			}
+		$.ajax({
+			type: "DELETE",
+			url: this.url + this.id + "/" + key,
+		}).done(function( msg ) {
+			callback();
 		});
-		xhr.send();
+
+		// var xhr = new XMLHttpRequest();
+		// xhr.open("DELETE", this.url + this.id + "/" + key ,true);
+		// xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+		// xhr.addEventListener("load", function(e){
+		// 	if(xhr.status === 200) {
+		// 		callback();
+		// 	}
+		// });
+		// xhr.send();
 	}
 }
 
@@ -55,6 +99,9 @@ var TODO =  {
 	ENTER_KEYCODE : 13,
 
 	init :  function() {
+
+		TODOSync.init();
+
 		$("#new-todo").on("keydown", this.add.bind(this));
 		$("#todo-list").on("click", ".toggle", this.completed);
 		$("#todo-list").on("click", ".destroy", this.remove);
