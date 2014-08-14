@@ -1,24 +1,11 @@
-//online, offline 이벤트 할당을 하고
-//offline일때 header 엘리먼트에 offline 클래스 추가하고
-//online일때 header 엘리먼트에 offline 클래스 삭제하기
-
-//todo-list 엘리먼트에 active(completed)엘리면트를 누르면
-//	1.todo list에 all-active(all-completed) 클래스 추가
-//	2.기존 anchor에 selected 삭제
-//	3.선택된 anchor에 selected 클래스 추가
-
-// 동적으로 UI를 변경후 history 추가
-// history.pushState({"method":"complete"},null,"active")
-// 뒤로가기 할때 이벤트를 받아서 변경
-// window.addEvnetLister("popstate", callback);
 
 var TODOSync = {
 	url : "http://ui.nhnnext.org:3333/",
 	id : "astomusic",
 	
 	init : function() {
-		window.addEventListener("online", this.onoffLineListener);
-		window.addEventListener("offline", this.onoffLineListener);
+		$(window).on("online", this.onoffLineListener);
+		$(window).on("offline", this.onoffLineListener);
 	},
 
 	onoffLineListener : function() {
@@ -36,15 +23,6 @@ var TODOSync = {
 		}).done(function( msg ) {
 			callback(msg);
 		});
-		// var xhr = new XMLHttpRequest();
-		// xhr.open("GET", this.url + this.id, true);
-		// xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-		// xhr.addEventListener("load", function(e){
-		// 	if(xhr.status === 200) {
-		// 		callback(JSON.parse(xhr.responseText));
-		// 	}
-		// }.bind(this));
-		// xhr.send();
 	},
 
 	add : function(todo, callback) {
@@ -60,17 +38,6 @@ var TODOSync = {
 			//data client 에 저장
 			//localStorage, idexed DB, wegsql
 		}
-		
-
-		// var xhr = new XMLHttpRequest();
-		// xhr.open("PUT", this.url + this.id, true);
-		// xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-		// xhr.addEventListener("load", function(e){
-		// 	if(xhr.status === 200) {
-		// 		callback(JSON.parse(xhr.responseText));
-		// 	}
-		// });
-		// xhr.send("todo="+todo);
 	},
 
 	completed : function(param, callback) {
@@ -81,16 +48,6 @@ var TODOSync = {
 		}).done(function( msg ) {
 			callback();
 		});
-
-		// var xhr = new XMLHttpRequest();
-		// xhr.open("POST", this.url + this.id + "/" + param.key ,true);
-		// xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-		// xhr.addEventListener("load", function(e){
-		// 	if(xhr.status === 200) {
-		// 		callback();
-		// 	}
-		// });
-		// xhr.send("completed="+param.completed);
 	},
 
 	remove : function(key, callback) {
@@ -100,16 +57,6 @@ var TODOSync = {
 		}).done(function( msg ) {
 			callback();
 		});
-
-		// var xhr = new XMLHttpRequest();
-		// xhr.open("DELETE", this.url + this.id + "/" + key ,true);
-		// xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-		// xhr.addEventListener("load", function(e){
-		// 	if(xhr.status === 200) {
-		// 		callback();
-		// 	}
-		// });
-		// xhr.send();
 	}
 }
 
