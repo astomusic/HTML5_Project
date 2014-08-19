@@ -1,4 +1,4 @@
-
+//jquery bind, map, classList, class remove add,
 var TODOSync = {
 	url : "http://ui.nhnnext.org:3333/",
 	id : "astomusic",
@@ -75,10 +75,19 @@ var TODO =  {
 		$("#new-todo").on("keydown", this.add.bind(this));
 		$("#todo-list").on("click", ".toggle", this.completed);
 		$("#todo-list").on("click", ".destroy", this.remove);
+		$("#todo-list").dblclick(function(e) {
+			if(e.target.tagName === "LABEL") {
+				this.edit(e);
+			}
+		}.bind(this));
 
 		$("#filters").on("click", "a", this.changeStateFilter.bind(this));
 
-		window.addEventListener("popstate", this.chageURLFilter.bind(this));
+		$(window).on("popstate", this.chageURLFilter.bind(this));
+	},
+
+	edit : function(e) {
+		console.log(e);
 	},
 
 	chageURLFilter : function(e) {
@@ -195,6 +204,7 @@ var TODO =  {
 				var todoLi = this.build(todo, json.insertId, "", "");
 				var appendedTodo = $('#todo-list').prepend(todoLi);
 				$("#new-todo")[0].value = "";
+				$("#todo-list li:last-child").offsetHeight;
 				$("#todo-list li:last-child").css("opacity", 1);
 			}.bind(this));	
 		}
