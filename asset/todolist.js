@@ -76,9 +76,7 @@ var TODO =  {
 		$("#todo-list").on("click", ".toggle", this.completed);
 		$("#todo-list").on("click", ".destroy", this.remove);
 		$("#todo-list").dblclick(function(e) {
-			if(e.target.tagName === "LABEL") {
-				this.edit(e);
-			}
+			if(e.target.tagName === "LABEL") this.edit(e);
 		}.bind(this));
 
 		$("#filters").on("click", "a", this.changeStateFilter.bind(this));
@@ -87,6 +85,7 @@ var TODO =  {
 	},
 
 	edit : function(e) {
+		//label을 edit가능하도록 한다
 		console.log(e);
 	},
 
