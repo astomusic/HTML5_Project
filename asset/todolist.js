@@ -1,4 +1,5 @@
-//jquery bind, map, classList, class remove add,
+//jquery 공부해야할 부분
+//bind, map, classList, class remove add,
 var TODOSync = {
 	url : "http://ui.nhnnext.org:3333/",
 	id : "astomusic",
@@ -75,6 +76,7 @@ var TODO =  {
 		$("#new-todo").on("keydown", this.add.bind(this));
 		$("#todo-list").on("click", ".toggle", this.completed);
 		$("#todo-list").on("click", ".destroy", this.remove);
+		//double click event 추가
 		$("#todo-list").dblclick(function(e) {
 			if(e.target.tagName === "LABEL") this.edit(e);
 		}.bind(this));
@@ -85,8 +87,23 @@ var TODO =  {
 	},
 
 	edit : function(e) {
-		//label을 edit가능하도록 한다
-		console.log(e);
+		//더블클릭한 라벨의 정보를 추출하고 input가능 상태로 변경한다.
+		//엔터키와 클릭으로 수정 이벤트를 종료한다.
+		e.stopPropagation(); 
+		var currentEle = e.target;
+		var value = currentEle.innerText;
+
+		$(currentEle).html('<input type="text" class="thVal" value="' + value + '" />');
+		$(".thVal").focus();
+		$(".thVal").keyup(function (event) {
+			if (event.keyCode == this.ENTER_KEYCODE) {
+				$(currentEle).html($(".thVal").val());
+			}
+		}.bind(this));
+		$(document).click(function () {
+			$(currentEle).html($(".thVal").val());
+			$(document).off('click');
+		});
 	},
 
 	chageURLFilter : function(e) {
