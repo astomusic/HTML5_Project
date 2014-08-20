@@ -51,6 +51,16 @@ var TODOSync = {
 		});
 	},
 
+	updated : function(param, callback) {
+		$.ajax({
+			type: "POST",
+			url: this.url + this.id + "/" + param.key,
+			data: { todo: param.todo }
+		}).done(function( msg ) {
+			callback();
+		});
+	},
+
 	remove : function(key, callback) {
 		$.ajax({
 			type: "DELETE",
@@ -88,22 +98,33 @@ var TODO =  {
 
 	edit : function(e) {
 		//더블클릭한 라벨의 정보를 추출하고 input가능 상태로 변경한다.
-		//엔터키와 클릭으로 수정 이벤트를 종료한다.
+		//엔터키와 클릭으로 수정 이벤트를 종료한다.(화면에 업데이트 전에 서버로 업데이트)
+		//서버단에 업데이트가 구현이 되어있지 않은 문제?
 		e.stopPropagation(); 
 		var currentEle = e.target;
 		var value = currentEle.innerText;
+		var li = $(currentEle).parent().parent();
+		var key = li[0].dataset.key;
 
 		$(currentEle).html('<input type="text" class="thVal" value="' + value + '" />');
 		$(".thVal").focus();
+		//엔터키 처리
 		$(".thVal").keyup(function (event) {
 			if (event.keyCode == this.ENTER_KEYCODE) {
-				$(currentEle).html($(".thVal").val());
+				value = $(".thVal").val();
+				TODOSync.updated({key: key, todo: value}, function(){
+					$(currentEle).html(value);
+				});
 			}
 		}.bind(this));
+		//클릭처리
 		$(document).click(function () {
-			$(currentEle).html($(".thVal").val());
+			value = $(".thVal").val();
+			TODOSync.updated({key: key, todo: value}, function(){
+				$(currentEle).html(value);
+			});
 			$(document).off('click');
-		});
+		}.bind(this));
 	},
 
 	chageURLFilter : function(e) {
