@@ -108,16 +108,50 @@ var TODO =  {
 
 		$(document).on("mousemove", function(eMove){
 			var diff = eMove.clientY - startY;
+			console.log($(ilTarget));
+			console.log($(ilTarget)[0].nextSibling);
 			console.log("diff:" + diff);
-			$(ilTarget).css({
-				top: diff,
-			});
-		});
+			if(diff < 50 && diff > -50){
+				$(ilTarget).css({
+					top: diff,
+				});
+			} 
+			else if(diff > 50){
+				this.swap($($(ilTarget)[0].nextSibling)[0], $(ilTarget)[0]);
+				$(ilTarget).css({
+					top: 0,
+				});
+			} 
+			else if(diff < -50){
+				this.swap($(ilTarget)[0], $($(ilTarget)[0].previousSibling)[0]);
+				$(ilTarget).css({
+					top: 0,
+				});
+			}
+			
+		}.bind(this));
 		$(document).on("mouseup", function(){
 			$(document).off("mousemove");
 		});
 
 		
+	},
+
+	swap : function(elm1, elm2) {
+		var parent1, next1,
+		parent2, next2;
+
+		parent1 = elm1.parentNode;
+		next1   = elm1.nextSibling;
+		parent2 = elm2.parentNode;
+		next2   = elm2.nextSibling;
+
+		parent1.insertBefore(elm2, next1);
+		parent2.insertBefore(elm1, next2);
+		$("#todo-list li:last-child").css("opacity", 1);
+		// console.log(node1);
+		// console.log(node1[0].parentNode);
+		// $("#todo-list")[0].insertBefore(node1[0], node2[0]);
 	},
 
 	pauseEvent : function(e){
