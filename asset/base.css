@@ -254,6 +254,7 @@ label[for='toggle-all'] {
 }
 
 #todo-list li label {
+	min-height: 32px;
 	white-space: pre;
 	word-break: break-word;
 	padding: 15px 60px 15px 15px;
@@ -273,7 +274,7 @@ label[for='toggle-all'] {
 	outline: none;
 	color: inherit;
 	font-weight: 900;
-	color: #FF8A8A;
+	color: #EE7036;
 	-webkit-font-smoothing: antialiased;
 	-moz-font-smoothing: antialiased;
 	-ms-font-smoothing: antialiased;

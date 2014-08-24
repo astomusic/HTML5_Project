@@ -82,18 +82,51 @@ var TODO =  {
 		utility.featureDetector();
 	},
 
-	initEventBind : function() {
+	initEventBind : function() {	
 		$("#new-todo").on("keydown", this.add.bind(this));
 		$("#todo-list").on("click", ".toggle", this.completed);
 		$("#todo-list").on("click", ".destroy", this.remove);
+
 		//double click event 추가
 		$("#todo-list").dblclick(function(e) {
 			if(e.target.tagName === "LABEL") this.edit(e);
 		}.bind(this));
 
+		//드레그 이벤트 확인을 위한 마우스 다운 이벤트 등록
+		$(document).on("mousedown", this.drag.bind(this));
+
 		$("#filters").on("click", "a", this.changeStateFilter.bind(this));
 
 		$(window).on("popstate", this.chageURLFilter.bind(this));
+	},
+
+	drag : function(e) {
+		//드레그 이벤트 발생시 
+		this.pauseEvent(e);
+		var startY = e.clientY;
+		var ilTarget = e.target.parentNode.parentNode;
+
+		$(document).on("mousemove", function(eMove){
+			var diff = eMove.clientY - startY;
+			console.log("diff:" + diff);
+			$(ilTarget).css({
+				top: diff,
+			});
+		});
+		$(document).on("mouseup", function(){
+			$(document).off("mousemove");
+		});
+
+		
+	},
+
+	pauseEvent : function(e){
+		//마우스 드래그시 마우스에 의한 text select을 방지해준다.
+	    if(e.stopPropagation) e.stopPropagation();
+	    if(e.preventDefault) e.preventDefault();
+	    e.cancelBubble=true;
+	    e.returnValue=false;
+	    return false;
 	},
 
 	edit : function(e) {
