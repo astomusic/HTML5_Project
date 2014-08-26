@@ -86,7 +86,7 @@ var TODO =  {
 		$("#new-todo").on("keydown", this.add.bind(this));
 		$("#todo-list").on("click", ".toggle", this.completed);
 		$("#todo-list").on("click", ".destroy", this.remove);
-
+		$("#clear-completed").on("click", this.clearCompleted);
 		//double click event 추가
 		$("#todo-list").dblclick(function(e) {
 			if(e.target.tagName === "LABEL") this.edit(e);
@@ -108,25 +108,30 @@ var TODO =  {
 
 		$(document).on("mousemove", function(eMove){
 			var diff = eMove.clientY - startY;
-			console.log($(ilTarget));
-			console.log($(ilTarget)[0].nextSibling);
-			console.log("diff:" + diff);
-			if(diff < 50 && diff > -50){
+			if(diff < 60 && diff > -60){
 				$(ilTarget).css({
 					top: diff,
+					backgroundColor: 'rgba(200, 200, 200, .5)'
+				});
+				$(document).on("mouseup", function(){
+					$(ilTarget).css({
+						top: 0,
+						backgroundColor: 'rgba(0, 0, 0, 0)'
+					});
 				});
 			} 
-			else if(diff > 50){
-				this.swap($($(ilTarget)[0].nextSibling)[0], $(ilTarget)[0]);
+			else if(diff > 60){
+				console.log(eMove.originalEvent.target.parentNode.parentNode);
 				$(ilTarget).css({
-					top: 0,
+					top: diff
 				});
+				$(eMove.originalEvent.target.parentNode.parentNode).after("<li>Test</li>");
+				//this.swap($($(ilTarget)[0].nextSibling)[0], $(ilTarget)[0]);
+
 			} 
-			else if(diff < -50){
-				this.swap($(ilTarget)[0], $($(ilTarget)[0].previousSibling)[0]);
-				$(ilTarget).css({
-					top: 0,
-				});
+			else if(diff < -60){
+				//this.swap($(ilTarget)[0], $($(ilTarget)[0].previousSibling)[0]);
+
 			}
 			
 		}.bind(this));
@@ -154,13 +159,19 @@ var TODO =  {
 		// $("#todo-list")[0].insertBefore(node1[0], node2[0]);
 	},
 
+	clearCompleted : function(e) {
+		console.log("clearCompleted");
+		//completed 된 todos 확인(서버로 부터 받은정보 기반 or 현재 UI기반?)
+		//해당 노드에 remove메소드 호출
+	},
+
 	pauseEvent : function(e){
 		//마우스 드래그시 마우스에 의한 text select을 방지해준다.
-	    if(e.stopPropagation) e.stopPropagation();
-	    if(e.preventDefault) e.preventDefault();
-	    e.cancelBubble=true;
-	    e.returnValue=false;
-	    return false;
+		if(e.stopPropagation) e.stopPropagation();
+		if(e.preventDefault) e.preventDefault();
+		e.cancelBubble=true;
+		e.returnValue=false;
+		return false;
 	},
 
 	edit : function(e) {
@@ -294,7 +305,8 @@ var TODO =  {
 
 		TODOSync.remove(key, function() {
 			li.css("opacity", 0);
-			li.on(utility.transitionEnd, function() { 
+			li.on(utility.transitionEnd, function() {
+				console.log("remove");
 				li.empty();
 			});	
 		});
@@ -324,11 +336,11 @@ var utility = {
 		var elForCheck = document.querySelector("body");
 
 		var status = {
+			"transitionEnd" : typeof elForCheck.style.transform,
 			"webkitTransitionEnd" : typeof elForCheck.style.webkitTransform,
 			"mozTransitionEnd" : typeof elForCheck.style.MozTransform,
 			"OTransitionEnd" : typeof elForCheck.style.OTransform,
-			"msTransitionEnd" : typeof elForCheck.style.msTransform,
-			"transitionEnd" : typeof elForCheck.style.transform
+			"msTransitionEnd" : typeof elForCheck.style.msTransform
 		}
 
 		for ( var key in status) {
