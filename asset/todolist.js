@@ -86,14 +86,14 @@ var TODO =  {
 		$("#new-todo").on("keydown", this.add.bind(this));
 		$("#todo-list").on("click", ".toggle", this.completed);
 		$("#todo-list").on("click", ".destroy", this.remove);
-		$("#clear-completed").on("click", this.clearCompleted);
+		$("#clear-completed").on("click", this.clearCompleted.bind(this));
 		//double click event 추가
 		$("#todo-list").dblclick(function(e) {
 			if(e.target.tagName === "LABEL") this.edit(e);
 		}.bind(this));
 
 		//드레그 이벤트 확인을 위한 마우스 다운 이벤트 등록
-		$(document).on("mousedown", this.drag.bind(this));
+		$("#todo-list").on("mousedown", "li", this.drag.bind(this));
 
 		$("#filters").on("click", "a", this.changeStateFilter.bind(this));
 
@@ -103,43 +103,26 @@ var TODO =  {
 	drag : function(e) {
 		//드레그 이벤트 발생시 
 		this.pauseEvent(e);
+		console.log("drag")
 		var startY = e.clientY;
 		var ilTarget = e.target.parentNode.parentNode;
 
 		$(document).on("mousemove", function(eMove){
 			var diff = eMove.clientY - startY;
-			if(diff < 60 && diff > -60){
-				$(ilTarget).css({
-					top: diff,
-					backgroundColor: 'rgba(200, 200, 200, .5)'
-				});
-				$(document).on("mouseup", function(){
-					$(ilTarget).css({
-						top: 0,
-						backgroundColor: 'rgba(0, 0, 0, 0)'
-					});
-				});
-			} 
-			else if(diff > 60){
-				console.log(eMove.originalEvent.target.parentNode.parentNode);
-				$(ilTarget).css({
-					top: diff
-				});
-				$(eMove.originalEvent.target.parentNode.parentNode).after("<li>Test</li>");
-				//this.swap($($(ilTarget)[0].nextSibling)[0], $(ilTarget)[0]);
-
-			} 
-			else if(diff < -60){
-				//this.swap($(ilTarget)[0], $($(ilTarget)[0].previousSibling)[0]);
-
-			}
-			
+			$(ilTarget).css({
+				top: diff,
+				backgroundColor: 'rgba(255, 255, 255, 0.8)',
+				border: '2px solid #6c615c',
+				zIndex: 100
+			});
 		}.bind(this));
+
 		$(document).on("mouseup", function(){
 			$(document).off("mousemove");
+			$(ilTarget).css({
+				backgroundColor: 'rgba(0, 0, 0, 0)'
+			});
 		});
-
-		
 	},
 
 	swap : function(elm1, elm2) {
@@ -159,10 +142,18 @@ var TODO =  {
 		// $("#todo-list")[0].insertBefore(node1[0], node2[0]);
 	},
 
+
 	clearCompleted : function(e) {
-		console.log("clearCompleted");
 		//completed 된 todos 확인(서버로 부터 받은정보 기반 or 현재 UI기반?)
 		//해당 노드에 remove메소드 호출
+		var todoList = $("#todo-list")[0].childNodes;
+		for(todo in todoList) {
+			if(todoList[todo].className === "completed") {
+				$('button',todoList[todo]).click();
+			}
+		}
+		
+		//$(test[0].childNodes[1].firstChild.childNodes[2])[0].click();
 	},
 
 	pauseEvent : function(e){
@@ -298,7 +289,8 @@ var TODO =  {
 	},
 
 	remove : function(e) {
-		var li = $(this).parent().parent();
+		console.log(e);
+		var li = $(e.target.parentNode.parentNode);
 		var ul = li.parent();
 
 		var key = li[0].dataset.key;
@@ -306,7 +298,6 @@ var TODO =  {
 		TODOSync.remove(key, function() {
 			li.css("opacity", 0);
 			li.on(utility.transitionEnd, function() {
-				console.log("remove");
 				li.empty();
 			});	
 		});
