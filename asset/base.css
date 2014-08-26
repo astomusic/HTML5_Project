@@ -199,7 +199,6 @@ label[for='toggle-all'] {
 
 #todo-list li:last-child {
 	border-bottom: none;
-	opacity: 0;
 	-webkit-transition: opacity 1.0s;
 	transition: opacity 1.0s;
 }

@@ -84,8 +84,8 @@ var TODO =  {
 
 	initEventBind : function() {	
 		$("#new-todo").on("keydown", this.add.bind(this));
-		$("#todo-list").on("click", ".toggle", this.completed);
-		$("#todo-list").on("click", ".destroy", this.remove);
+		$("#todo-list").on("click", ".toggle", this.completed.bind(this));
+		$("#todo-list").on("click", ".destroy", this.remove.bind(this));
 		$("#clear-completed").on("click", this.clearCompleted.bind(this));
 		//double click event 추가
 		$("#todo-list").dblclick(function(e) {
@@ -112,7 +112,7 @@ var TODO =  {
 			$(ilTarget).css({
 				top: diff,
 				backgroundColor: 'rgba(255, 255, 255, 0.8)',
-				border: '2px solid #6c615c',
+				border: '1px solid #adadad',
 				zIndex: 100
 			});
 		}.bind(this));
@@ -120,7 +120,11 @@ var TODO =  {
 		$(document).on("mouseup", function(){
 			$(document).off("mousemove");
 			$(ilTarget).css({
-				backgroundColor: 'rgba(0, 0, 0, 0)'
+				top: 0,
+				backgroundColor: 'rgba(0, 0, 0, 0)',
+				border: 'none',
+				borderBottom	: '1px dotted #adadad',
+				zIndex: 1
 			});
 		});
 	},
@@ -136,12 +140,22 @@ var TODO =  {
 
 		parent1.insertBefore(elm2, next1);
 		parent2.insertBefore(elm1, next2);
-		$("#todo-list li:last-child").css("opacity", 1);
-		// console.log(node1);
-		// console.log(node1[0].parentNode);
-		// $("#todo-list")[0].insertBefore(node1[0], node2[0]);
 	},
 
+	todoCount : function() {
+		//남은 todo의 숫자를 count 해준다
+		//todo-list에서 completed 되지 않은 li의 수를 세어서 todo-count에 넣어준다.
+		var todoList = $("#todo-list")[0].childNodes;
+		var todoCount = $("#todo-count");
+		var count = 0;
+		for(todo in todoList) {
+			if(todoList[todo].className !== "completed" && todoList[todo].tagName === "LI") {
+				count++;
+			}
+		}
+		console.log(todoList);
+		todoCount.html("<strong>" + count  + "</strong> items left");
+	},
 
 	clearCompleted : function(e) {
 		//completed 된 todos 확인(서버로 부터 받은정보 기반 or 현재 UI기반?)
@@ -152,8 +166,6 @@ var TODO =  {
 				$('button',todoList[todo]).click();
 			}
 		}
-		
-		//$(test[0].childNodes[1].firstChild.childNodes[2])[0].click();
 	},
 
 	pauseEvent : function(e){
@@ -218,7 +230,6 @@ var TODO =  {
 			this.completedView();
 			history.pushState({"method":"completed"},null,"completed");
 		}
-
 		e.preventDefault();
 	},
 
@@ -252,9 +263,10 @@ var TODO =  {
 				var checked = res.completed?"checked":"";
 				var todoLi = this.build(res.todo, res.id, completed, checked); 
 				initLi = initLi + todoLi;
+				console.log(res.date)
 			}.bind(this));
 			var appendedTodo = $('#todo-list').append(initLi);
-			$("#todo-list li:last-child").css("opacity", 1);
+			this.todoCount();
 		}.bind(this));
 	},
 
@@ -272,8 +284,8 @@ var TODO =  {
 	},
 
 	completed : function(e) {
-		var li = $(this).parent().parent();
-		var checked = $(this).prop("checked")?"1":"0"
+		var li = $(e.target).parent().parent();
+		var checked = $(e.target).prop("checked")?"1":"0"
 
 		TODOSync.completed({
 			key: li[0].dataset.key,
@@ -284,13 +296,12 @@ var TODO =  {
 			} else {
 				li.removeClass("completed");
 			}
-		});
-		
+			this.todoCount();
+		}.bind(this));
 	},
 
 	remove : function(e) {
-		console.log(e);
-		var li = $(e.target.parentNode.parentNode);
+		var li = $(e.target).parent().parent();
 		var ul = li.parent();
 
 		var key = li[0].dataset.key;
@@ -298,9 +309,10 @@ var TODO =  {
 		TODOSync.remove(key, function() {
 			li.css("opacity", 0);
 			li.on(utility.transitionEnd, function() {
-				li.empty();
-			});	
-		});
+				li.remove();
+				this.todoCount();
+			}.bind(this));
+		}.bind(this));
 	},
 
 	add : function(e){
@@ -312,7 +324,7 @@ var TODO =  {
 				var appendedTodo = $('#todo-list').prepend(todoLi);
 				$("#new-todo")[0].value = "";
 				$("#todo-list li:last-child").offsetHeight;
-				$("#todo-list li:last-child").css("opacity", 1);
+				this.todoCount();
 			}.bind(this));	
 		}
 	}
