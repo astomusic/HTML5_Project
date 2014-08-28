@@ -256,15 +256,12 @@ var TODO =  {
 
 	getTodoList : function() {
 		TODOSync.get(function(response){
-			var initLi = ""
-			response.map(function(res){
+			var initLiArr = response.map(function(res){
 				var completed = res.completed?"completed":"";
 				var checked = res.completed?"checked":"";
-				var todoLi = this.build(res.todo, res.id, completed, checked); 
-				initLi = initLi + todoLi;
-				console.log(res.date)
+				return this.build(res.todo, res.id, completed, checked);
 			}.bind(this));
-			var appendedTodo = $('#todo-list').append(initLi);
+			var appendedTodo = $('#todo-list').append(initLiArr.join(""));
 			this.todoCount();
 		}.bind(this));
 	},
