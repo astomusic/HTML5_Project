@@ -11,7 +11,7 @@ ongoing - #4, #17
 
 WEEK 2
 ```
-closed - #19
+closed - #19, #22, #21
 ongoing - #4, #17
 ```
 

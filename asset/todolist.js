@@ -169,11 +169,8 @@ var TODO =  {
 
 	pauseEvent : function(e){
 		//마우스 드래그시 마우스에 의한 text select을 방지해준다.
-		if(e.stopPropagation) e.stopPropagation();
-		if(e.preventDefault) e.preventDefault();
-		e.cancelBubble=true;
-		e.returnValue=false;
-		return false;
+		e.stopPropagation();
+		e.preventDefault();
 	},
 
 	edit : function(e) {
