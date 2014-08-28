@@ -144,21 +144,16 @@ var TODO =  {
 	todoCount : function() {
 		//남은 todo의 숫자를 count 해준다
 		//todo-list에서 completed 되지 않은 li의 수를 세어서 todo-count에 넣어준다.
-		var todoList = $("#todo-list")[0].childNodes;
+		var completed = $(".completed", $("#todo-list"));
+		var uncompleted = $("li", $("#todo-list"));
 		var todoCount = $("#todo-count");
 		var completedCount = $('button', $("#footer"));
-		var count = 0;
-		var countCompeleted = 0;
-		for(todo in todoList) {
-			if(todoList[todo].className !== "completed" && todoList[todo].tagName === "LI") {
-				count++;
-			}
-			if(todoList[todo].className === "completed") {
-				countCompeleted++;
-			}
-		}
+
+		var countCompeleted = completed.length;
+		var countUncompleted = uncompleted.length - completed.length;
+
 		completedCount.html("Clear completed(<strong>" + countCompeleted + "</strong>)");
-		todoCount.html("<strong>" + count  + "</strong> items left");
+		todoCount.html("<strong>" + countUncompleted  + "</strong> items left");
 	},
 
 	clearCompleted : function(e) {
