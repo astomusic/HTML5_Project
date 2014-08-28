@@ -157,14 +157,9 @@ var TODO =  {
 	},
 
 	clearCompleted : function(e) {
-		//completed 된 todos 확인(서버로 부터 받은정보 기반 or 현재 UI기반?)
+		//completed 된 todos 확인
 		//해당 노드에 remove메소드 호출
-		var todoList = $("#todo-list")[0].childNodes;
-		for(todo in todoList) {
-			if(todoList[todo].className === "completed") {
-				$('button',todoList[todo]).click();
-			}
-		}
+		$("button", $("#todo-list .completed")).click();
 	},
 
 	pauseEvent : function(e){
