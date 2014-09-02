@@ -47,7 +47,7 @@ var TODOSync = {
 			url: this.url + this.id + "/" + param.key,
 			data: { completed: param.completed }
 		}).done(function( msg ) {
-			callback();
+			callback(msg);
 		});
 	},
 
@@ -93,7 +93,7 @@ var TODO =  {
 		}.bind(this));
 
 		//드레그 이벤트 확인을 위한 마우스 다운 이벤트 등록
-		$("#todo-list").on("mousedown", "li", this.drag.bind(this));
+		$("#todo-list").on("mousedown", "label", this.drag.bind(this));
 
 		$("#filters").on("click", "a", this.changeStateFilter.bind(this));
 
@@ -250,9 +250,10 @@ var TODO =  {
 			var initLiArr = response.map(function(res){
 				var completed = res.completed?"completed":"";
 				var checked = res.completed?"checked":"";
-				console.log(res.date);
+				var date = res.completed?"":utility.dateParser(res.date);
+				console.log(utility.dateParser(res.date));
 				console.log(utility.getDateTime());
-				return this.build(res.todo, res.date, res.id, completed, checked);
+				return this.build(res.todo, date, res.id, completed, checked);
 			}.bind(this));
 			var appendedTodo = $('#todo-list').append(initLiArr.join(""));
 			this.todoCount();
@@ -274,24 +275,32 @@ var TODO =  {
 	},
 
 	completed : function(e) {
-		var li = $(e.target).parent().parent();
-		var checked = $(e.target).prop("checked")?"1":"0"
+		var li = $(e.target).closest('li');
+		var checked = $(e.target).prop("checked")?"1":"0";
+		var date = $(e.target).next('.date');
+		var dateBackUp = date[0].innerText;
 
 		TODOSync.completed({
 			key: li[0].dataset.key,
 			completed: checked
-		},function(){
+		},function(res){
 			if(checked == "1") {
 				li.addClass("completed");
+				date.css({
+					opacity: 0
+				});
 			} else {
 				li.removeClass("completed");
+				date.css({
+					opacity: 1
+				});
 			}
 			this.todoCount();
 		}.bind(this));
 	},
 
 	remove : function(e) {
-		var li = $(e.target).parent().parent();
+		var li = $(e.target).closest('li');
 		var ul = li.parent();
 
 		var key = li[0].dataset.key;
@@ -326,11 +335,19 @@ var utility = {
 	getDateTime : function() {
 		var currentdate = new Date();
 		var twoDigitMonth = ((currentdate.getMonth().length+1) === 1)? (currentdate.getMonth()+1) : '0' + (currentdate.getMonth()+1);
+		var twoDigitDate= ((currentdate.getDate().length+1) === 1)? (currentdate.getDate()+1) : '0' + (currentdate.getDate());
 		var datetime = currentdate.getFullYear() + "-"
-		+ twoDigitMonth		 + "-" + currentdate.getDate()
+		var datetime = currentdate.getFullYear() + "-"
+		+ twoDigitMonth + "-" + twoDigitDate
 		+ " " + currentdate.getHours() + ":" + currentdate.getMinutes()
 		+ ":" + currentdate.getSeconds();
 		return datetime;
+	},
+
+	dateParser : function(date) {
+		date = date.replace("T", " ");
+		date = date.substring(0,date.length-5);
+		return date;
 	},
 
 	featureDetector : function() {
@@ -359,8 +376,9 @@ var utility = {
 		var temp = "";
 		temp += "<li data-key={{key}} class={{completed}}>";
 		temp += "<div class=\"view\">";
-		temp += "<input class=\"toggle\" type=\"checkbox\" {{checked}}>";
-		temp += "<label>{{text}} </label>"; //<a class=\"date\"> due date : {{date}}</a>
+		temp += "<input class=\"toggle\" type=\"checkbox\" {{checked}}>"
+		temp += "<div class=\"date\">{{date}}</div>";
+		temp += "<label>{{text}} </label>";
 		temp += "<button class=\"destroy\"></button>";
 		temp += "</div>";
 		temp += "</li>";

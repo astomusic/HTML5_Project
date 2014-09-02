@@ -282,7 +282,10 @@ label[for='toggle-all'] {
 }
 
 .date {
-	font-size: 5px;
+	float: right;
+	padding-right: 70px;
+	padding-top: 5px;
+	font-size: 12px;
 	font-family: inherit;
 	color: inherit;
 	-webkit-font-smoothing: antialiased;
