@@ -114,6 +114,7 @@ var TODO =  {
 				border: '1px solid #ccc',
 				zIndex: 100
 			});
+			this.swap(eMove);
 		}.bind(this));
 
 		$(document).on("mouseup", function(){
@@ -128,17 +129,15 @@ var TODO =  {
 		});
 	},
 
-	swap : function(elm1, elm2) {
-		var parent1, next1,
-		parent2, next2;
-
-		parent1 = elm1.parentNode;
-		next1   = elm1.nextSibling;
-		parent2 = elm2.parentNode;
-		next2   = elm2.nextSibling;
-
-		parent1.insertBefore(elm2, next1);
-		parent2.insertBefore(elm1, next2);
+	swap : function(e) {
+		var $li = $(e.target).closest('li');
+		if (jQuery(e.target).is('.move-down')) {
+			$li.next('li').after($li); 
+			console.log($li.next('li'));
+		} else {
+	       	$li.prev('li').before($li);
+	       	console.log($li.prev('li'));
+	    }
 	},
 
 	todoCount : function() {
@@ -251,16 +250,19 @@ var TODO =  {
 			var initLiArr = response.map(function(res){
 				var completed = res.completed?"completed":"";
 				var checked = res.completed?"checked":"";
-				return this.build(res.todo, res.id, completed, checked);
+				console.log(res.date);
+				console.log(utility.getDateTime());
+				return this.build(res.todo, res.date, res.id, completed, checked);
 			}.bind(this));
 			var appendedTodo = $('#todo-list').append(initLiArr.join(""));
 			this.todoCount();
 		}.bind(this));
 	},
 
-	build : function(todo, key, completed, checked) {
+	build : function(todo, date, key, completed, checked) {
 		var template_vars = {
 			text: todo,
+			date: date,
 			key: key,
 			completed: completed,
 			checked: checked
@@ -321,6 +323,16 @@ var TODO =  {
 var utility = {
 	transitionEnd : "",
 
+	getDateTime : function() {
+		var currentdate = new Date();
+		var twoDigitMonth = ((currentdate.getMonth().length+1) === 1)? (currentdate.getMonth()+1) : '0' + (currentdate.getMonth()+1);
+		var datetime = currentdate.getFullYear() + "-"
+		+ twoDigitMonth		 + "-" + currentdate.getDate()
+		+ " " + currentdate.getHours() + ":" + currentdate.getMinutes()
+		+ ":" + currentdate.getSeconds();
+		return datetime;
+	},
+
 	featureDetector : function() {
 		// 해당브라우져에서 동작가능한 transitionEnd 타입을 찾아서 해당 타입을 result로 반환 해준다.
 		var result;
@@ -348,7 +360,7 @@ var utility = {
 		temp += "<li data-key={{key}} class={{completed}}>";
 		temp += "<div class=\"view\">";
 		temp += "<input class=\"toggle\" type=\"checkbox\" {{checked}}>";
-		temp += "<label>{{text}}</label>";
+		temp += "<label>{{text}} </label>"; //<a class=\"date\"> due date : {{date}}</a>
 		temp += "<button class=\"destroy\"></button>";
 		temp += "</div>";
 		temp += "</li>";

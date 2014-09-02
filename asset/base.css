@@ -281,6 +281,17 @@ label[for='toggle-all'] {
 	font-smoothing: antialiased;
 }
 
+.date {
+	font-size: 5px;
+	font-family: inherit;
+	color: inherit;
+	-webkit-font-smoothing: antialiased;
+	-moz-font-smoothing: antialiased;
+	-ms-font-smoothing: antialiased;
+	-o-font-smoothing: antialiased;
+	font-smoothing: antialiased;
+}
+
 #todo-list li.completed label {
 	color: #a9a9a9;
 	text-decoration: line-through;
