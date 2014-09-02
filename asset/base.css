@@ -295,6 +295,10 @@ label[for='toggle-all'] {
 	font-smoothing: antialiased;
 }
 
+.date.completed {
+	opacity: 0;
+}
+
 #todo-list li.completed label {
 	color: #a9a9a9;
 	text-decoration: line-through;

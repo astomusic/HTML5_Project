@@ -250,9 +250,7 @@ var TODO =  {
 			var initLiArr = response.map(function(res){
 				var completed = res.completed?"completed":"";
 				var checked = res.completed?"checked":"";
-				var date = res.completed?"":utility.dateParser(res.date);
-				console.log(utility.dateParser(res.date));
-				console.log(utility.getDateTime());
+				var date = utility.dateParser(res.date);
 				return this.build(res.todo, date, res.id, completed, checked);
 			}.bind(this));
 			var appendedTodo = $('#todo-list').append(initLiArr.join(""));
@@ -286,14 +284,10 @@ var TODO =  {
 		},function(res){
 			if(checked == "1") {
 				li.addClass("completed");
-				date.css({
-					opacity: 0
-				});
+				date.addClass("completed");
 			} else {
 				li.removeClass("completed");
-				date.css({
-					opacity: 1
-				});
+				date.removeClass("completed");
 			}
 			this.todoCount();
 		}.bind(this));
@@ -377,7 +371,7 @@ var utility = {
 		temp += "<li data-key={{key}} class={{completed}}>";
 		temp += "<div class=\"view\">";
 		temp += "<input class=\"toggle\" type=\"checkbox\" {{checked}}>"
-		temp += "<div class=\"date\">{{date}}</div>";
+		temp += "<div class=\"date {{completed}}\">{{date}}</div>";
 		temp += "<label>{{text}} </label>";
 		temp += "<button class=\"destroy\"></button>";
 		temp += "</div>";
