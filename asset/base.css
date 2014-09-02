@@ -267,11 +267,10 @@ label[for='toggle-all'] {
 .thVal {
 	border: none;
 	margin: 0;
-	width: 100%;
+	width: 70%;
 	font-size: 24px;
 	font-family: inherit;
 	outline: none;
-	color: inherit;
 	font-weight: 900;
 	color: #EE7036;
 	-webkit-font-smoothing: antialiased;
@@ -283,6 +282,7 @@ label[for='toggle-all'] {
 
 .date {
 	float: right;
+	font-weight: 900;
 	padding-right: 70px;
 	padding-top: 5px;
 	font-size: 12px;
@@ -293,6 +293,13 @@ label[for='toggle-all'] {
 	-ms-font-smoothing: antialiased;
 	-o-font-smoothing: antialiased;
 	font-smoothing: antialiased;
+}
+
+.date > .thVal {
+	padding-right: 0px;
+	padding-top: 0px;
+	width: 100%;
+	font-size: 12px;
 }
 
 .date.completed {

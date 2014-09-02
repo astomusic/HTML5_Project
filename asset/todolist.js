@@ -90,6 +90,7 @@ var TODO =  {
 		//double click event 추가
 		$("#todo-list").dblclick(function(e) {
 			if(e.target.tagName === "LABEL") this.edit(e);
+			if(e.target.className.trim() === "date") this.editDate(e);
 		}.bind(this));
 
 		//드레그 이벤트 확인을 위한 마우스 다운 이벤트 등록
@@ -174,11 +175,11 @@ var TODO =  {
 		e.stopPropagation(); 
 		var currentEle = e.target;
 		var value = currentEle.innerText;
-		var li = $(currentEle).parent().parent();
+		var li = $(currentEle).closest('li');
 		var key = li[0].dataset.key;
 
 		$(currentEle).html('<input type="text" class="thVal" value="' + value + '" />');
-		$(".thVal").focus();
+		$(".thVal").select();
 		//엔터키 처리
 		$(".thVal").keyup(function (event) {
 			if (event.keyCode == this.ENTER_KEYCODE) {
@@ -194,6 +195,34 @@ var TODO =  {
 			TODOSync.updated({key: key, todo: value}, function(){
 				$(currentEle).html(value);
 			});
+			$(document).off('click');
+		}.bind(this));
+	},
+
+	editDate : function(e) {
+		e.stopPropagation(); 
+		var currentEle = e.target;
+		var value = currentEle.innerText;
+		var li = $(currentEle).closest('li');
+		var key = li[0].dataset.key;
+
+		$(currentEle).html('<input type="text" class="thVal" value="' + value + '" />');
+		$(".thVal").select();
+		//엔터키 처리
+		$(".thVal").keyup(function (event) {
+			if (event.keyCode == this.ENTER_KEYCODE) {
+				value = $(".thVal").val();
+				// TODOSync.updated({key: key, todo: value}, function(){
+				// 	$(currentEle).html(value);
+				// });
+			}
+		}.bind(this));
+		//클릭처리
+		$(document).click(function () {
+			value = $(".thVal").val();
+			// TODOSync.updated({key: key, todo: value}, function(){
+			// 	$(currentEle).html(value);
+			// });
 			$(document).off('click');
 		}.bind(this));
 	},
