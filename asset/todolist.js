@@ -47,7 +47,7 @@ var TODOSync = {
 			url: this.url + this.id + "/" + param.key,
 			data: { completed: param.completed }
 		}).done(function( msg ) {
-			callback(msg);
+			callback();
 		});
 	},
 
@@ -90,8 +90,10 @@ var TODO =  {
 		//double click event 추가
 		$("#todo-list").dblclick(function(e) {
 			if(e.target.tagName === "LABEL") this.edit(e);
-			if(e.target.className.trim() === "date") this.editDate(e);
+			//if(e.target.className.trim() === "date") this.editDate(e);
 		}.bind(this));
+
+		$("#todo-list").on("click", ".date", this.editDate.bind(this));
 
 		//드레그 이벤트 확인을 위한 마우스 다운 이벤트 등록
 		$("#todo-list").on("mousedown", "label", this.drag.bind(this));
@@ -204,33 +206,23 @@ var TODO =  {
 	},
 
 	editDate : function(e) {
-		e.stopPropagation(); 
+		//e.stopPropagation(); 
 		var currentEle = e.target;
 		var value = currentEle.innerText;
 		var li = $(currentEle).closest('li');
 		var key = li[0].dataset.key;
 
 		$(currentEle).html('<input type="text" class="thVal" value="' + value + '" />');
-		$(".thVal").focus();
+		//
 		$(".thVal").datepicker({ dateFormat: "yy/mm/dd" });
-		//엔터키 처리
-		$(".thVal").keyup(function (event) {
-			if (event.keyCode == this.ENTER_KEYCODE) {
-				value = $(".thVal").val();
-				TODOSync.updated({key: key, date: value}, function(){
-					$(currentEle).html(value);
-				});
-			}
-		}.bind(this));
-		//클릭처리
-		$(document).click(function (e) {
-			if(e.target.tagName !== "INPUT") {
-				value = $(".thVal").val();
-				TODOSync.updated({key: key, date: value}, function(){
+		$(".thVal").focus();
+
+		$(".thVal").change(function (event) {
+			console.log("hi");
+			value = $(".thVal").val();
+			TODOSync.updated({key: key, date: value}, function(){
 				$(currentEle).html(value);
-				});
-				$(document).off('click');
-			}
+			});
 		}.bind(this));
 	},
 
@@ -371,12 +363,6 @@ var utility = {
 		var datetime = currentdate.getFullYear() + "/"
 		+ twoDigitMonth + "/" + twoDigitDate
 		return datetime;
-	},
-
-	dateToData : function(date) {
-		date = date.split("/").join("-");
-		date =  date + "T00:00:00.000Z";
-		return date;
 	},
 
 	dataToDate : function(date) {
