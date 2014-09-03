@@ -22,6 +22,7 @@ var TODOSync = {
 			type: "GET",
 			url: this.url + this.id,
 		}).done(function( msg ) {
+			msg.sort(function(a, b){return b.id-a.id});
 			callback(msg);
 		});
 	},
