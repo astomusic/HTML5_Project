@@ -55,7 +55,7 @@ var TODOSync = {
 		$.ajax({
 			type: "POST",
 			url: this.url + this.id + "/" + param.key,
-			data: { todo: param.todo }
+			data: { todo: param.todo, date : param.date }
 		}).done(function( msg ) {
 			callback();
 		});
@@ -82,7 +82,7 @@ var TODO =  {
 		utility.featureDetector();
 	},
 
-	initEventBind : function() {	
+	initEventBind : function() {
 		$("#new-todo").on("keydown", this.add.bind(this));
 		$("#todo-list").on("click", ".toggle", this.completed.bind(this));
 		$("#todo-list").on("click", ".destroy", this.remove.bind(this));
@@ -191,11 +191,15 @@ var TODO =  {
 		}.bind(this));
 		//클릭처리
 		$(document).click(function () {
-			value = $(".thVal").val();
-			TODOSync.updated({key: key, todo: value}, function(){
+			console.log(e.target.tagName);
+			//LABEL이 잡히는 문제
+			if(e.target.tagName !== "INPUT") {
+				value = $(".thVal").val();
+				TODOSync.updated({key: key, todo: value}, function(){
 				$(currentEle).html(value);
-			});
-			$(document).off('click');
+				});
+				$(document).off('click');
+			}
 		}.bind(this));
 	},
 
@@ -207,23 +211,26 @@ var TODO =  {
 		var key = li[0].dataset.key;
 
 		$(currentEle).html('<input type="text" class="thVal" value="' + value + '" />');
-		$(".thVal").select();
+		$(".thVal").focus();
+		$(".thVal").datepicker({ dateFormat: "yy/mm/dd" });
 		//엔터키 처리
 		$(".thVal").keyup(function (event) {
 			if (event.keyCode == this.ENTER_KEYCODE) {
 				value = $(".thVal").val();
-				// TODOSync.updated({key: key, todo: value}, function(){
-				// 	$(currentEle).html(value);
-				// });
+				TODOSync.updated({key: key, date: value}, function(){
+					$(currentEle).html(value);
+				});
 			}
 		}.bind(this));
 		//클릭처리
-		$(document).click(function () {
-			value = $(".thVal").val();
-			// TODOSync.updated({key: key, todo: value}, function(){
-			// 	$(currentEle).html(value);
-			// });
-			$(document).off('click');
+		$(document).click(function (e) {
+			if(e.target.tagName !== "INPUT") {
+				value = $(".thVal").val();
+				TODOSync.updated({key: key, date: value}, function(){
+				$(currentEle).html(value);
+				});
+				$(document).off('click');
+			}
 		}.bind(this));
 	},
 
@@ -279,7 +286,8 @@ var TODO =  {
 			var initLiArr = response.map(function(res){
 				var completed = res.completed?"completed":"";
 				var checked = res.completed?"checked":"";
-				var date = utility.dateParser(res.date);
+				var date = utility.dataToDate(res.date);
+				console.log(res.date);
 				return this.build(res.todo, date, res.id, completed, checked);
 			}.bind(this));
 			var appendedTodo = $('#todo-list').append(initLiArr.join(""));
@@ -342,7 +350,7 @@ var TODO =  {
 			var todo = $("#new-todo")[0].value;
 			
 			TODOSync.add(todo, function(json){
-				var todoLi = this.build(todo, json.insertId, "", "");
+				var todoLi = this.build(todo, utility.now, json.insertId, "", "");
 				var appendedTodo = $('#todo-list').prepend(todoLi);
 				$("#new-todo")[0].value = "";
 				$("#todo-list li:last-child").offsetHeight;
@@ -355,21 +363,25 @@ var TODO =  {
 var utility = {
 	transitionEnd : "",
 
-	getDateTime : function() {
+	now : function() {
 		var currentdate = new Date();
 		var twoDigitMonth = ((currentdate.getMonth().length+1) === 1)? (currentdate.getMonth()+1) : '0' + (currentdate.getMonth()+1);
 		var twoDigitDate= ((currentdate.getDate().length+1) === 1)? (currentdate.getDate()+1) : '0' + (currentdate.getDate());
 		var datetime = currentdate.getFullYear() + "-"
-		var datetime = currentdate.getFullYear() + "-"
-		+ twoDigitMonth + "-" + twoDigitDate
-		+ " " + currentdate.getHours() + ":" + currentdate.getMinutes()
-		+ ":" + currentdate.getSeconds();
+		var datetime = currentdate.getFullYear() + "/"
+		+ twoDigitMonth + "/" + twoDigitDate
 		return datetime;
 	},
 
-	dateParser : function(date) {
-		date = date.replace("T", " ");
-		date = date.substring(0,date.length-5);
+	dateToData : function(date) {
+		date = date.split("/").join("-");
+		date =  date + "T00:00:00.000Z";
+		return date;
+	},
+
+	dataToDate : function(date) {
+		date = date.split("-").join("/");
+		date = date.substring(0,date.length-14);
 		return date;
 	},
 
