@@ -106,9 +106,20 @@ var TODO =  {
 		this.pauseEvent(e);
 		var startY = e.clientY;
 		var liTarget = e.target.parentNode.parentNode;
+		var liHeight = $(liTarget).height();
+		var count = 0; 
 
 		$(document).on("mousemove", function(eMove){
 			var diff = eMove.clientY - startY;
+			var newCount  = Math.floor(diff/liHeight);
+			if(newCount !== count) {
+				count = newCount;
+				var liMoveTarget = utility.liMover($(liTarget), count);
+				//liMoveTarget.animate({'marginBottom': '62px'}, 500);
+				console.log(count);
+				console.log(liMoveTarget);
+			}
+			
 			$(liTarget).css({
 				top: diff,
 				backgroundColor: 'rgba(230, 230, 230, 0.8)',
@@ -119,9 +130,8 @@ var TODO =  {
 
 		$(document).on("mouseup", function(eUp){
 			var diff = eUp.clientY - startY;
-			var liHeight = $(liTarget).height();
-			var count  = Math.ceil(diff/liHeight);
-			var liMoveTarget = utility.liMover($(liTarget), count);
+			var endCount  = Math.ceil(diff/liHeight);
+			var liMoveTarget = utility.liMover($(liTarget), endCount);
 
 			$(liTarget).insertBefore(liMoveTarget);
 
@@ -178,21 +188,21 @@ var TODO =  {
 		$(".thVal").focus();
 		$(".thVal")[0].setSelectionRange(value.length, value.length);
 		//엔터키 처리
-		$(".thVal").on("keyup" ,function(event) {
+		$(".thVal").on("keyup" , function (e){
 			if (event.keyCode == this.ENTER_KEYCODE) {
-				value = $(".thVal").val();
+				value = $(e.target).val();
 				TODOSync.updated({key: key, todo: value}, function(){
 					$(currentEle).html(value);
 				});
 			}
 		}.bind(this));
 		//클릭처리
-		$(".thVal").on("blur", function (){
-			//LABEL이 잡히는 문제
-			value = $(".thVal").val();
+		$(".thVal").on("blur", function (e){
+			value = $(e.target).val();
 			TODOSync.updated({key: key, todo: value}, function(){
 				$(currentEle).html(value);
 			});
+			$(".thVal").off("blur");
 			$(document).off('click');
 		}.bind(this));
 	},
