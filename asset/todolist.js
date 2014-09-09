@@ -105,22 +105,28 @@ var TODO =  {
 		//드레그 이벤트 발생시 
 		this.pauseEvent(e);
 		var startY = e.clientY;
-		var ilTarget = e.target.parentNode.parentNode;
+		var liTarget = e.target.parentNode.parentNode;
 
 		$(document).on("mousemove", function(eMove){
 			var diff = eMove.clientY - startY;
-			$(ilTarget).css({
+			$(liTarget).css({
 				top: diff,
-				backgroundColor: 'rgba(255, 255, 255, 0.8)',
+				backgroundColor: 'rgba(230, 230, 230, 0.8)',
 				border: '1px solid #ccc',
 				zIndex: 100
 			});
-			this.swap(eMove);
 		}.bind(this));
 
-		$(document).on("mouseup", function(){
+		$(document).on("mouseup", function(eUp){
+			var diff = eUp.clientY - startY;
+			var liHeight = $(liTarget).height();
+			var count  = Math.ceil(diff/liHeight);
+			var liMoveTarget = utility.liMover($(liTarget), count);
+
+			$(liTarget).insertBefore(liMoveTarget);
+
 			$(document).off("mousemove");
-			$(ilTarget).css({
+			$(liTarget).css({
 				top: 0,
 				backgroundColor: 'rgba(0, 0, 0, 0)',
 				border: 'none',
@@ -129,17 +135,6 @@ var TODO =  {
 			});
 			$(document).off("mouseup");
 		});
-	},
-
-	swap : function(e) {
-		var $li = $(e.target).closest('li');
-		if (jQuery(e.target).is('.move-down')) {
-			$li.next('li').after($li); 
-			console.log($li.next('li'));
-		} else {
-			$li.prev('li').before($li);
-			console.log($li.prev('li'));
-		}
 	},
 
 	todoCount : function() {
@@ -190,7 +185,7 @@ var TODO =  {
 					$(currentEle).html(value);
 				});
 			}
-		}.bind(this);
+		}.bind(this));
 		//클릭처리
 		$(".thVal").on("blur", function (){
 			//LABEL이 잡히는 문제
@@ -297,7 +292,6 @@ var TODO =  {
 			var initLiArr = response.map(function(res){
 				var completed = res.completed?"completed":"";
 				var checked = res.completed?"checked":"";
-				console.log(res.date);
 				var date = utility.dataToDate(res.date);
 				return this.build(res.todo, date, res.id, completed, checked);
 			}.bind(this));
@@ -375,6 +369,14 @@ var TODO =  {
 
 var utility = {
 	transitionEnd : "",
+
+	liMover : function(li, count) {
+		var counter = Math.abs(count);
+		for(var i=0 ; i<counter ; i++) {
+			li = count>0?li.next():li.prev();
+		}
+		return li;
+	},
 
 	now : function() {
 		var currentdate = new Date();
