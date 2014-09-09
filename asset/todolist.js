@@ -89,10 +89,7 @@ var TODO =  {
 		$("#todo-list").on("click", ".destroy", this.remove.bind(this));
 		$("#clear-completed").on("click", this.clearCompleted.bind(this));
 		//double click event 추가
-		$("#todo-list").dblclick(function(e) {
-			if(e.target.tagName === "LABEL") this.edit(e);
-			//if(e.target.className.trim() === "date") this.editDate(e);
-		}.bind(this));
+		$("#todo-list").on("dblclick", "label", this.edit.bind(this));
 
 		$("#todo-list").on("click", ".date", this.editDate.bind(this));
 
@@ -130,6 +127,7 @@ var TODO =  {
 				borderBottom: '1px dotted #ccc',
 				zIndex: 1
 			});
+			$(document).off("mouseup");
 		});
 	},
 
@@ -139,9 +137,9 @@ var TODO =  {
 			$li.next('li').after($li); 
 			console.log($li.next('li'));
 		} else {
-	       	$li.prev('li').before($li);
-	       	console.log($li.prev('li'));
-	    }
+			$li.prev('li').before($li);
+			console.log($li.prev('li'));
+		}
 	},
 
 	todoCount : function() {
@@ -182,7 +180,8 @@ var TODO =  {
 		var key = li[0].dataset.key;
 
 		$(currentEle).html('<input type="text" class="thVal" value="' + value + '" />');
-		$(".thVal").select();
+		$(".thVal").focus();
+		$(".thVal")[0].setSelectionRange(value.length, value.length);
 		//엔터키 처리
 		$(".thVal").keyup(function (event) {
 			if (event.keyCode == this.ENTER_KEYCODE) {
@@ -193,16 +192,13 @@ var TODO =  {
 			}
 		}.bind(this));
 		//클릭처리
-		$(document).click(function () {
-			console.log(e.target);
+		$(".thVal").on("blur", function (){
 			//LABEL이 잡히는 문제
-			if(e.target.tagName !== "INPUT") {
-				value = $(".thVal").val();
-				TODOSync.updated({key: key, todo: value}, function(){
+			value = $(".thVal").val();
+			TODOSync.updated({key: key, todo: value}, function(){
 				$(currentEle).html(value);
-				});
-				$(document).off('click');
-			}
+			});
+			$(document).off('click');
 		}.bind(this));
 	},
 
@@ -214,17 +210,39 @@ var TODO =  {
 		var key = li[0].dataset.key;
 
 		$(currentEle).html('<input type="text" class="thVal" value="' + value + '" />');
-		//
-		$(".thVal").datepicker({ dateFormat: "yy/mm/dd" });
+		//"2014-09-02T15:00:00.000Z"
+		$(".thVal").datepicker({ 
+			dateFormat: "yy/mm/dd",
+			onSelect: function(dateText,inst) {
+				console.log(utility.dateToData(dateText));
+				TODOSync.updated({key: key, date:utility.dateToData(dateText)}, function(){
+					$(currentEle).html(dateText);
+					this.checkDueDate();
+				}.bind(this));
+			}.bind(this),
+			onClose: function(dateText) {
+				$(currentEle).html(dateText);
+				this.checkDueDate();
+			}.bind(this)
+		});
 		$(".thVal").focus();
+	},
 
-		$(".thVal").change(function (event) {
-			console.log("hi");
-			value = $(".thVal").val();
-			TODOSync.updated({key: key, date: value}, function(){
-				$(currentEle).html(value);
-			});
-		}.bind(this));
+	checkDueDate : function() {
+		var dates = $("li .date", $("#todo-list")).not(".completed");
+		$.each(dates, function(key, value) {
+			var diff = utility.getGapofDate(value.innerText);
+			$(value).removeClass("emergency");
+			$(value).removeClass("warning");
+			$(value).removeClass("info");
+			if (diff < 1) {
+				$(value).addClass("emergency");
+			} else if(diff < 8) {
+				$(value).addClass("warning");
+			} else {
+				$(value).addClass("info");
+			} 
+		});
 	},
 
 	chageURLFilter : function(e) {
@@ -279,12 +297,13 @@ var TODO =  {
 			var initLiArr = response.map(function(res){
 				var completed = res.completed?"completed":"";
 				var checked = res.completed?"checked":"";
-				var date = utility.dataToDate(res.date);
 				console.log(res.date);
+				var date = utility.dataToDate(res.date);
 				return this.build(res.todo, date, res.id, completed, checked);
 			}.bind(this));
 			var appendedTodo = $('#todo-list').append(initLiArr.join(""));
 			this.todoCount();
+			this.checkDueDate();
 		}.bind(this));
 	},
 
@@ -341,13 +360,14 @@ var TODO =  {
 	add : function(e){
 		if(e.keyCode === this.ENTER_KEYCODE) {
 			var todo = $("#new-todo")[0].value;
-			
+
 			TODOSync.add(todo, function(json){
 				var todoLi = this.build(todo, utility.now, json.insertId, "", "");
 				var appendedTodo = $('#todo-list').prepend(todoLi);
 				$("#new-todo")[0].value = "";
 				$("#todo-list li:last-child").offsetHeight;
 				this.todoCount();
+				this.checkDueDate();
 			}.bind(this));	
 		}
 	}
@@ -366,9 +386,24 @@ var utility = {
 		return datetime;
 	},
 
-	dataToDate : function(date) {
-		date = date.split("-").join("/");
-		date = date.substring(0,date.length-14);
+	getGapofDate : function(date) {
+		var t1 = new Date(this.now());
+		var t2 = new Date(date);
+		var diff = (t2 - t1)/1000/60/60/24;
+
+		return diff;
+	},
+	//yyyy-mm-ddThh:mm:ss.000Z -> yy/mm/dd 
+	dataToDate : function(data) {
+		data = data.split("-").join("/");
+		data = data.substring(0,data.length-14);
+		return data;
+	},
+	//yy/mm/dd -> yyyy-mm-ddThh:mm:ss.000Z  
+	dateToData : function(date) {
+		var times = "T15:00:00.000Z";
+		date = date.split("/").join("-");
+		date = date.concat(times);
 		return date;
 	},
 
@@ -400,7 +435,7 @@ var utility = {
 		temp += "<div class=\"view\">";
 		temp += "<input class=\"toggle\" type=\"checkbox\" {{checked}}>"
 		temp += "<div class=\"date {{completed}}\">{{date}}</div>";
-		temp += "<label>{{text}} </label>";
+		temp += "<label>{{text}}</label>";
 		temp += "<button class=\"destroy\"></button>";
 		temp += "</div>";
 		temp += "</li>";
