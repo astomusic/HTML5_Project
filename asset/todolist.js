@@ -183,14 +183,14 @@ var TODO =  {
 		$(".thVal").focus();
 		$(".thVal")[0].setSelectionRange(value.length, value.length);
 		//엔터키 처리
-		$(".thVal").keyup(function (event) {
+		$(".thVal").on("keyup" ,function(event) {
 			if (event.keyCode == this.ENTER_KEYCODE) {
 				value = $(".thVal").val();
 				TODOSync.updated({key: key, todo: value}, function(){
 					$(currentEle).html(value);
 				});
 			}
-		}.bind(this));
+		}.bind(this);
 		//클릭처리
 		$(".thVal").on("blur", function (){
 			//LABEL이 잡히는 문제
