@@ -81,6 +81,7 @@ var TODO =  {
 		this.initEventBind();
 		this.getTodoList();
 		utility.featureDetector();
+		utility.today = utility.now();
 	},
 
 	initEventBind : function() {
@@ -107,14 +108,18 @@ var TODO =  {
 		var startY = e.clientY;
 		var liTarget = e.target.parentNode.parentNode;
 		var liHeight = $(liTarget).height();
-		var count = 0; 
+		var count = 0;
 
 		$(document).on("mousemove", function(eMove){
 			var diff = eMove.clientY - startY;
 			var newCount  = Math.floor(diff/liHeight);
+
 			if(newCount !== count) {
 				count = newCount;
 				var liMoveTarget = utility.liMover($(liTarget), count);
+				liMoveTarget.css({
+					borderBottom: '62px solid #ccc'
+				});
 				//liMoveTarget.animate({'marginBottom': '62px'}, 500);
 				console.log(count);
 				console.log(liMoveTarget);
@@ -122,7 +127,7 @@ var TODO =  {
 			
 			$(liTarget).css({
 				top: diff,
-				backgroundColor: 'rgba(230, 230, 230, 0.8)',
+				backgroundColor: 'rgba(235, 235, 235, 0.7)',
 				border: '1px solid #ccc',
 				zIndex: 100
 			});
@@ -379,6 +384,7 @@ var TODO =  {
 
 var utility = {
 	transitionEnd : "",
+	today: "",
 
 	liMover : function(li, count) {
 		var counter = Math.abs(count);
@@ -390,8 +396,8 @@ var utility = {
 
 	now : function() {
 		var currentdate = new Date();
-		var twoDigitMonth = ((currentdate.getMonth().length+1) === 1)? (currentdate.getMonth()+1) : '0' + (currentdate.getMonth()+1);
-		var twoDigitDate= ((currentdate.getDate().length+1) === 1)? (currentdate.getDate()+1) : '0' + (currentdate.getDate());
+		var twoDigitMonth = ((currentdate.getMonth()) > 10)? (currentdate.getMonth()+1) : '0' + (currentdate.getMonth()+1);
+		var twoDigitDate= ((currentdate.getDate()) > 1)? (currentdate.getDate()) : '0' + (currentdate.getDate());
 		var datetime = currentdate.getFullYear() + "-"
 		var datetime = currentdate.getFullYear() + "/"
 		+ twoDigitMonth + "/" + twoDigitDate
@@ -399,7 +405,7 @@ var utility = {
 	},
 
 	getGapofDate : function(date) {
-		var t1 = new Date(this.now());
+		var t1 = new Date(this.today);
 		var t2 = new Date(date);
 		var diff = (t2 - t1)/1000/60/60/24;
 
