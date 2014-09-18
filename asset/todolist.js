@@ -106,22 +106,23 @@ var TODO =  {
 		var liTarget = e.target.parentNode.parentNode;
 		var liHeight = $(liTarget).height();
 		var count = 0;
+		var liMoveTarget;
 
 		$(document).on("mousemove", function(eMove){
 			var diff = eMove.clientY - startY;
-			var newCount  = Math.floor(diff/liHeight);
+			var newCount  = Math.ceil(diff/liHeight) - 1; 
 
 			if(newCount !== count) {
+				$("li", $("#todo-list")).css({
+					borderBottom: '1px dotted #ccc'
+				});
 				count = newCount;
-				var liMoveTarget = utility.liMover($(liTarget), count);
+				liMoveTarget = utility.liMover($(liTarget), count);
 				liMoveTarget.css({
 					borderBottom: '62px solid #ccc'
 				});
-				//liMoveTarget.animate({'marginBottom': '62px'}, 500);
-				console.log(count);
-				console.log(liMoveTarget);
-			}
-			
+			} 
+				
 			$(liTarget).css({
 				top: diff,
 				backgroundColor: 'rgba(235, 235, 235, 0.7)',
@@ -133,9 +134,12 @@ var TODO =  {
 		$(document).on("mouseup", function(eUp){
 			var diff = eUp.clientY - startY;
 			var endCount  = Math.ceil(diff/liHeight);
-			var liMoveTarget = utility.liMover($(liTarget), endCount);
+			var liUpTarget = utility.liMover($(liTarget), endCount);
 
-			$(liTarget).insertBefore(liMoveTarget);
+			$(liTarget).insertBefore(liUpTarget);
+			liMoveTarget.css({
+				borderBottom: '1px dotted #ccc'
+			});
 
 			$(document).off("mousemove");
 			$(liTarget).css({
