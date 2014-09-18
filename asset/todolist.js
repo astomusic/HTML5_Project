@@ -91,12 +91,9 @@ var TODO =  {
 		$("#clear-completed").on("click", this.clearCompleted.bind(this));
 		//double click event 추가
 		$("#todo-list").on("dblclick", "label", this.edit.bind(this));
-
 		$("#todo-list").on("click", ".date", this.editDate.bind(this));
-
 		//드레그 이벤트 확인을 위한 마우스 다운 이벤트 등록
 		$("#todo-list").on("mousedown", "label", this.drag.bind(this));
-
 		$("#filters").on("click", "a", this.changeStateFilter.bind(this));
 
 		$(window).on("popstate", this.chageURLFilter.bind(this));
