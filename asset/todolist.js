@@ -106,22 +106,46 @@ var TODO =  {
 		var liTarget = e.target.parentNode.parentNode;
 		var liHeight = $(liTarget).height();
 		var count = 0;
-		var liMoveTarget;
+		var liMoveTarget = null;
 
 		$(document).on("mousemove", function(eMove){
+			var sizeMin = 220;
+			var sizeMax = 600;
+
+			eMove.clientY = eMove.clientY < sizeMin ? sizeMin : eMove.clientY;
+			eMove.clientY = eMove.clientY > sizeMax ? sizeMax : eMove.clientY;
 			var diff = eMove.clientY - startY;
 			var newCount  = Math.ceil(diff/liHeight) - 1; 
 
-			if(newCount !== count) {
-				$("li", $("#todo-list")).css({
-					borderBottom: '1px dotted #ccc'
-				});
-				count = newCount;
-				liMoveTarget = utility.liMover($(liTarget), count);
-				liMoveTarget.css({
-					borderBottom: '62px solid #ccc'
-				});
-			} 
+			console.log(eMove.clientY);
+			if(diff > 0 ) {
+				if(newCount !== count) {
+					$("li", $("#todo-list")).css({
+						borderBottom: '1px dotted #ccc',
+						borderTop: '0px'
+					});
+					
+					count = newCount;
+					liMoveTarget = utility.liMover($(liTarget), count);
+					liMoveTarget.css({
+						borderBottom: '62px solid #ccc'
+					});
+				} 
+			} else {
+				if(newCount !== count) {
+					$("li", $("#todo-list")).css({
+						borderBottom: '1px dotted #ccc',
+						borderTop: '0px'
+					});
+					
+					count = newCount;
+					liMoveTarget = utility.liMover($(liTarget), count + 1);
+					liMoveTarget.css({
+						borderTop: '62px solid #ccc'
+					});
+				} 
+			}
+
 				
 			$(liTarget).css({
 				top: diff,
@@ -136,11 +160,15 @@ var TODO =  {
 			var endCount  = Math.ceil(diff/liHeight);
 			var liUpTarget = utility.liMover($(liTarget), endCount);
 
-			$(liTarget).insertBefore(liUpTarget);
-			liMoveTarget.css({
-				borderBottom: '1px dotted #ccc'
-			});
 
+			$(liTarget).insertBefore(liUpTarget);
+			if(liMoveTarget !== null) {
+				liMoveTarget.css({
+					borderBottom: '1px dotted #ccc',
+					borderTop: '0px'
+				});
+			}
+			
 			$(document).off("mousemove");
 			$(liTarget).css({
 				top: 0,
@@ -397,7 +425,7 @@ var utility = {
 
 	now : function() {
 		var currentdate = new Date();
-		var twoDigitMonth = ((currentdate.getMonth()) > 10)? (currentdate.getMonth()+1) : '0' + (currentdate.getMonth()+1);
+		var twoDigitMonth = ((currentdate.getMonth()+1) > 9)? (currentdate.getMonth()+1) : '0' + (currentdate.getMonth()+1);
 		var twoDigitDate= ((currentdate.getDate()) > 1)? (currentdate.getDate()) : '0' + (currentdate.getDate());
 		var datetime = currentdate.getFullYear() + "-"
 		var datetime = currentdate.getFullYear() + "/"
